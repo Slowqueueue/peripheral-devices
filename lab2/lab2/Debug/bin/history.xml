@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<history>
+   <processor signature="arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -g -nostartfiles -Map=lab2.map -Os --gc-sections -LC:\CooCox\CoIDE\configuration\ProgramData\lab2 -TC:\CooCox\CoIDE\configuration\ProgramData\lab2/link.ld -g">
+      <target file="lab2.elf" lastModified="192dbb454fb">
+         <source file="..\obj\semihosting.o" lastModified="192dbb45067"/>
+         <source file="..\obj\system_stm32f10x.o" lastModified="192dbb45096"/>
+         <source file="..\obj\startup_stm32f10x_md.o" lastModified="192dbb450c5"/>
+         <source file="..\obj\stm32f10x_gpio.o" lastModified="192dbb45113"/>
+         <source file="..\obj\main.o" lastModified="192dbb45151"/>
+         <source file="..\obj\printf.o" lastModified="192dbb451a0"/>
+         <source file="..\obj\stm32f10x_rcc.o" lastModified="192dbb451ee"/>
+         <source file="..\obj\stm32f10x_exti.o" lastModified="192dbb4522c"/>
+         <source file="..\obj\stm32f10x_adc.o" lastModified="192dbb4528a"/>
+         <source file="..\obj\sh_cmd.o" lastModified="192dbb4528a"/>
+         <source file="..\obj\syscalls.o" lastModified="192dbb452b9"/>
+         <source file="..\obj\stm32f10x_dma.o" lastModified="192dbb452f7"/>
+         <source file="..\obj\misc.o" lastModified="192dbb45326"/>
+      </target>
+   </processor>
+</history>
