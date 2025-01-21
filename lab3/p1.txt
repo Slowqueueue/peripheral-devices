@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_rcc.h"
+#include<stm32f10x_adc.h>
+#include "stm32f10x.h"
+#include "stm32f10x_conf.h"
+GPIO_InitTypeDef GPIO_InitStructure;
+ADC_InitTypeDef ADC_InitStructure; // Инициализация init-структуры ADC
+int main(void) {
+// Инициализация RCC
+	SystemInit();
+	/* Установка тактовой частоты аналого-цифровому преобразователю */
+	RCC_ADCCLKConfig(RCC_PCLK2_Div4);
+	// enable ADC system clock
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+	/* Включение контроллера прямого доступа к памяти DMA*/
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+	// Включение GPIOA и управление альтернативными функциями
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+	// Использование пинов PA0 и PA15
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_15 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
+	// Включение режима работы в Analog Input
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+	// Инициализация GPIOA
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	// define ADC config
+	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent; // независимый режим работы
+	ADC_InitStructure.ADC_ScanConvMode = DISABLE; // Сканирование каналов выключено
+	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE; // Режим непрерывного преобразования включен
+	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None; // Старт по внешнему событию отключен
+	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right; // смещение 12-битного результата в 16-битный регистр вправо
+	ADC_InitStructure.ADC_NbrOfChannel = 1; // число каналов
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_55Cycles5); // конфигурирование 1 канала
+	ADC_Init(ADC1, &ADC_InitStructure); // инициализация
+	ADC_Cmd(ADC1, ENABLE); // включение ADC1
+	// Калибровка АЦП при запуске
+	ADC_ResetCalibration(ADC1); // Сброс предыдущей калибровки
+	while (ADC_GetResetCalibrationStatus(ADC1)) //Ожидание изменения статуса
+	;
+	ADC_StartCalibration(ADC1); // Запуск новой калибровки
+	while (ADC_GetCalibrationStatus(ADC1))
+	;
+	ADC_SoftwareStartConvCmd(ADC1, ENABLE); // Программный запуск непрерывного преобразования
+	while (1) {
+		uint16_t value = ADC_GetConversionValue(ADC1); // считывание значения
+		printf("Value: %d\n\r", value); // вывод в консоль
+	}
+}

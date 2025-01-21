@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_rcc.h"
+#include <stm32f10x_adc.h>
+#include "stm32f10x_dma.h"
+#include "stm32f10x.h"
+#include "stm32f10x_conf.h"
+#define ADC1_DR_Address ((uint32_t)0x4001244C)
+GPIO_InitTypeDef GPIO_InitStructure;
+ADC_InitTypeDef ADC_InitStructure;
+DMA_InitTypeDef DMA_InitStructure;
+__IO uint16_t ADCConvertedValue;
+int main(void) {
+	// Инициализация RCC
+	SystemInit();
+	/* Установка тактовой частоты аналого-цифровому преобразователю (делитель 4)*/
+	RCC_ADCCLKConfig(RCC_PCLK2_Div4);
+	// enable ADC system clock
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+	/* Включение контроллера прямого доступа к памяти DMA */
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+	// Включение GPIOA и управление альтернативными функциями
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+	// Использование пинов PA0 и PA15
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_15 | GPIO_Pin_1
+	| GPIO_Pin_2 | GPIO_Pin_3;
+	// Включение режима работы в Input
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+	// Инициализация GPIOA
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent; // независимый режим работы
+	ADC_InitStructure.ADC_ScanConvMode = DISABLE;
+	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+	ADC_InitStructure.ADC_NbrOfChannel = 1;
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_55Cycles5); // конфигурирование первого канала АЦП
+	ADC_Init(ADC1, &ADC_InitStructure); // инициализация
+	/* Конфигурация 1 канала DMA*/
+	DMA_DeInit(DMA1_Channel1);
+	DMA_InitStructure.DMA_PeripheralBaseAddr = ADC1_DR_Address; // Адрес периферийного устройства
+	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) & ADCConvertedValue; // Адрес в памяти на хранилище считанных значений
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC; // Направление передачи периферия-память
+	DMA_InitStructure.DMA_BufferSize = 1; // размер буффера
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; // Инкремент адреса источника выключен
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable; // Инкремент адреса приемника выключен
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord; // размер данных 16 бит
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular; // Непрерывный режим работы
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High; // Приоритет высокий
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable; //режим память-память отключен
+	DMA_Init(DMA1_Channel1, &DMA_InitStructure); //Инициализация контроллера
+	DMA_Cmd(DMA1_Channel1, ENABLE); // Включение DMA на канале 1
+	ADC_DMACmd(ADC1, ENABLE); // Подключение ADC к DMA
+	// включение АЦП
+	ADC_Cmd(ADC1, ENABLE);
+	// Калибровка АЦП
+	ADC_ResetCalibration(ADC1); // Сброс предыдущей калибровки
+	while (ADC_GetResetCalibrationStatus(ADC1))
+	;
+	ADC_StartCalibration(ADC1); // Запуск калибровки
+	while (ADC_GetCalibrationStatus(ADC1))
+	;
+	ADC_Cmd(ADC1, ENABLE);
+	ADC_SoftwareStartConvCmd(ADC1, ENABLE); // Программный запуск непрерывного преобразования
+	while (1) {
+		uint16_t value = ADCConvertedValue; // считывание значения и вывод в консоль
+		printf("Value: %d\n\r", value);
+	}
+}
