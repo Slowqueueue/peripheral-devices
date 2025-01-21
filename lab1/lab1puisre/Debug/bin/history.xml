@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<history>
+   <processor signature="arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -g -nostartfiles -Map=lab1puisre.map -Os --gc-sections -LC:\CooCox\CoIDE\configuration\ProgramData\lab1puisre -TC:\CooCox\CoIDE\configuration\ProgramData\lab1puisre/arm-gcc-link.ld -g">
+      <target file="lab1puisre.elf" lastModified="1924b77ffbe">
+         <source file="..\obj\semihosting.o" lastModified="1924b77f7e9"/>
+         <source file="..\obj\system_stm32f10x.o" lastModified="1924b77f898"/>
+         <source file="..\obj\startup_stm32f10x_md.o" lastModified="1924b77f8f2"/>
+         <source file="..\obj\stm32f10x_gpio.o" lastModified="1924b77f9ba"/>
+         <source file="..\obj\main.o" lastModified="1924b77fa3c"/>
+         <source file="..\obj\printf.o" lastModified="1924b77faf0"/>
+         <source file="..\obj\stm32f10x_rcc.o" lastModified="1924b77fb8f"/>
+         <source file="..\obj\stm32f10x_adc.o" lastModified="1924b77fc39"/>
+         <source file="..\obj\sh_cmd.o" lastModified="1924b77fc4d"/>
+         <source file="..\obj\syscalls.o" lastModified="1924b77fcbb"/>
+         <source file="..\obj\stm32f10x_dma.o" lastModified="1924b77fd33"/>
+      </target>
+   </processor>
+</history>
